@@ -13,8 +13,8 @@ test('submitting the form calls onSubmit with username and password', async () =
   // 💰 if you need a hand, here's what the handleSubmit function should do:
   // const handleSubmit = data => (submittedData = data)
   const handleSubmit = jest.fn()
-  const username = faker.person.fullName()
-  const password = faker.string.uuid()
+  const username = faker.internet.username()
+  const password = faker.internet.password()
 
   //
   // 🐨 render the login with your handleSubmit function as the onSubmit prop

@@ -74,5 +74,7 @@ test(`omitting a password displays an error`, async () => {
   const loader = screen.getByLabelText(/loading/i)
   await waitForElementToBeRemoved(loader)
   expect(screen.getByText(passwordError)).toBeInTheDocument()
-  expect(screen.getByRole('alert')).toBeInTheDocument()
+  expect(screen.getByRole('alert').textContent).toMatchInlineSnapshot(
+    `"password required"`,
+  )
 })

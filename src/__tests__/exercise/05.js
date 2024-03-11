@@ -6,6 +6,7 @@ import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {build, fake} from '@jackfranklin/test-data-bot'
 import {setupServer} from 'msw/node'
+import {rest} from 'msw'
 import Login from '../../components/login-submission'
 import {handlers} from '../../test/server-handlers'
 
@@ -30,6 +31,10 @@ beforeAll(() => {
 
 afterAll(() => {
   return server.close()
+})
+
+afterEach(() => {
+  return server.resetHandlers()
 })
 
 test(`logging in displays the user's username`, async () => {
@@ -74,7 +79,27 @@ test(`omitting a password displays an error`, async () => {
   const loader = screen.getByLabelText(/loading/i)
   await waitForElementToBeRemoved(loader)
   expect(screen.getByText(passwordError)).toBeInTheDocument()
+})
+test(`displays unpredictable errors`, async () => {
+  server.use(
+    rest.post(
+      // note that it's the same URL as our app-wide handler
+      // so this will override the other.
+      'https://auth-provider.example.com/api/login',
+      async (req, res, ctx) => {
+        // your one-off handler here
+        return res(ctx.status(500), ctx.json({message: 'something is wrong'}))
+      },
+    ),
+  )
+  render(<Login />)
+  const {username, password} = buildLoginForm()
+  await userEvent.type(screen.getByLabelText(/username/i), username)
+  await userEvent.type(screen.getByLabelText(/password/i), password)
+  await userEvent.click(screen.getByRole('button', {name: /submit/i}))
+  const loader = screen.getByLabelText(/loading/i)
+  await waitForElementToBeRemoved(loader)
   expect(screen.getByRole('alert').textContent).toMatchInlineSnapshot(
-    `"password required"`,
+    `"something is wrong"`,
   )
 })

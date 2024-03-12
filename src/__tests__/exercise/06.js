@@ -4,20 +4,9 @@
 import * as React from 'react'
 import {render, screen, act} from '@testing-library/react'
 import Location from '../../examples/location'
+import {useCurrentPosition} from 'react-use-geolocation'
 
-beforeAll(() => {
-  window.navigator.geolocation = {
-    getCurrentPosition: jest.fn(),
-  }
-})
-function deferred() {
-  let resolve, reject
-  const promise = new Promise((res, rej) => {
-    resolve = res
-    reject = rej
-  })
-  return {promise, resolve, reject}
-}
+jest.mock('react-use-geolocation')
 
 test('displays the users current location', async () => {
   const fakePosition = {
@@ -26,25 +15,19 @@ test('displays the users current location', async () => {
       longitude: 135,
     },
   }
-  const {promise, resolve} = deferred()
-  window.navigator.geolocation.getCurrentPosition.mockImplementation(
-    callback => {
-      promise.then(() => callback(fakePosition))
-    },
-  )
-  render(<Location />)
-
-  expect(screen.getByLabelText(/loading/i)).toBeInTheDocument()
-  console.log(fakePosition)
-
-  await act(async () => {
-    resolve()
-
-    await promise
-    console.log(promise)
+  let setState
+  useCurrentPosition.mockImplementation(() => {
+    const [state, updater] = React.useState([])
+    setState = updater
+    return state
   })
 
-  expect(screen.queryByLabelText(/loading/i)).not.toBeInTheDocument()
+  render(<Location />)
+
+  expect(screen.queryByLabelText(/loading/i)).toBeInTheDocument()
+  act(() => {
+    setState([fakePosition])
+  })
   expect(screen.getByText(/latitude/i)).toHaveTextContent('Latitude: 35')
   expect(screen.getByText(/longitude/i)).toHaveTextContent('Longitude: 135')
 })

@@ -5,10 +5,12 @@ import * as React from 'react'
 import {render, screen, act} from '@testing-library/react'
 import Location from '../../examples/location'
 import {useCurrentPosition} from 'react-use-geolocation'
+import {faker} from '@faker-js/faker'
 
 jest.mock('react-use-geolocation')
 
 test('displays the users current location', async () => {
+  const errorMessage = faker.lorem.sentence()
   const fakePosition = {
     coords: {
       latitude: 35,
@@ -26,7 +28,11 @@ test('displays the users current location', async () => {
 
   expect(screen.queryByLabelText(/loading/i)).toBeInTheDocument()
   act(() => {
-    setState([fakePosition])
+    setState([null, {message: errorMessage}])
+  })
+  expect(screen.getByRole('alert').textContent).toBe(errorMessage)
+  act(() => {
+    setState([fakePosition, null])
   })
   expect(screen.getByText(/latitude/i)).toHaveTextContent('Latitude: 35')
   expect(screen.getByText(/longitude/i)).toHaveTextContent('Longitude: 135')

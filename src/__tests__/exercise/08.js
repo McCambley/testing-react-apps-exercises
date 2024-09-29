@@ -4,38 +4,29 @@
 import * as React from 'react'
 import {render, act} from '@testing-library/react'
 import useCounter from '../../components/use-counter'
-
-function setup(...args) {
-  const returnVal = {}
-  function TestComponent() {
-    Object.assign(returnVal, useCounter(...args))
-    return null
-  }
-  render(<TestComponent />)
-  return returnVal
-}
+import {renderHook} from '@testing-library/react'
 
 test('allows customization of the initial count', () => {
-  const result = setup()
-  expect(result.count).toEqual(0)
+  const {result} = renderHook(() => useCounter())
+  expect(result.current.count).toEqual(0)
   act(() => {
-    result.increment()
+    result.current.increment()
   })
-  expect(result.count).toEqual(1)
+  expect(result.current.count).toEqual(1)
   act(() => {
-    result.decrement()
+    result.current.decrement()
   })
-  expect(result.count).toEqual(0)
+  expect(result.current.count).toEqual(0)
 })
 test('allows customization of the step', () => {
-  const result = setup({step: 2})
-  expect(result.count).toEqual(0)
+  const {result} = renderHook(() => useCounter({step: 2}))
+  expect(result.current.count).toEqual(0)
   act(() => {
-    result.increment()
+    result.current.increment()
   })
-  expect(result.count).toEqual(2)
+  expect(result.current.count).toEqual(2)
   act(() => {
-    result.decrement()
+    result.current.decrement()
   })
-  expect(result.count).toEqual(0)
+  expect(result.current.count).toEqual(0)
 })

@@ -5,13 +5,7 @@ import * as React from 'react'
 import {render, screen} from '@testing-library/react'
 import {ThemeProvider} from '../../components/theme'
 import EasyButton from '../../components/easy-button'
-
-function renderWithTheme(ui, {theme = 'light', ...options} = {}) {
-  function Wrapper({children}) {
-    return <ThemeProvider initialTheme={theme}>{children}</ThemeProvider>
-  }
-  return render(ui, {wrapper: Wrapper, ...options})
-}
+import {render as renderWithTheme} from 'test/test-utils'
 
 test('renders with the light styles for the light theme', () => {
   renderWithTheme(<EasyButton>Easy</EasyButton>)
